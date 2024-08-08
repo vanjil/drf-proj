@@ -1,6 +1,22 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
+from materials.models import Kurs, Urok
 
+class Payment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_payments')
+    payment_date = models.DateTimeField(auto_now_add=True)
+    paid_course = models.ForeignKey(Kurs, null=True, blank=True, on_delete=models.CASCADE, related_name='user_payments')
+    paid_lesson = models.ForeignKey(Urok, null=True, blank=True, on_delete=models.CASCADE, related_name='user_payments')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=20, choices=[('card', 'Card'), ('paypal', 'PayPal')])
+
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+
+    def __str__(self):
+        return f"{self.user} - {self.amount} - {self.payment_date}"
 
 class City(models.Model):
     name = models.CharField(max_length=100, verbose_name="Название города")

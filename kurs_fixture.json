@@ -1,0 +1,10 @@
+[
+    {
+        "model": "materials.kurs",
+        "pk": 12,
+        "fields": {
+            "name": "станок",
+            "description": "основа"
+        }
+    }
+]

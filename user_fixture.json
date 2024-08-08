@@ -1,0 +1,17 @@
+[
+    {
+        "model": "users.User",
+        "pk": 1,
+        "fields": {
+            "email": "ivan@example.com",
+            "password": "pbkdf2_sha256$216000$sample$hash",
+            "first_name": "ivan",
+            "last_name": "petrov",
+            "is_active": true,
+            "is_staff": false,
+            "is_superuser": false,
+            "last_login": null,
+            "date_joined": "2024-08-08T00:00:00Z"
+        }
+    }
+]
