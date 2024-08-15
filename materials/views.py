@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Payment
 from .serializer import PaymentSerializer
 from .filters import PaymentFilter
+from .permissions import IsOwnerOrModerator
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
@@ -15,21 +16,18 @@ class PaymentViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaymentFilter
 
-
 class UrokViewSet(ModelViewSet):
     queryset = Urok.objects.all()
     serializer_class = UrokSerializer
-
+    permission_classes = [IsOwnerOrModerator]
 
 class KursCreateApiView(CreateAPIView):
     queryset = Kurs.objects.all()
     serializer_class = KursSerializer
 
-
 class KursListApiView(ListAPIView):
     queryset = Kurs.objects.all()
     serializer_class = KursSerializer
-
 
 class KursRetrieveApiView(RetrieveAPIView):
     queryset = Kurs.objects.all()
@@ -43,7 +41,7 @@ class KursDestroyApiView(DestroyAPIView):
     queryset = Kurs.objects.all()
     serializer_class = KursSerializer
 
-
 class KursViewSet(viewsets.ModelViewSet):
     queryset = Kurs.objects.all()
     serializer_class = KursSerializer
+    permission_classes = [IsOwnerOrModerator]

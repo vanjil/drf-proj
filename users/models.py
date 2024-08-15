@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from materials.models import Kurs, Urok
+from .managers import CustomUserManager
 
 class Payment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_payments')
@@ -27,7 +28,6 @@ class City(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class User(AbstractUser):
     username = None
@@ -63,6 +63,8 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()  # Укажите кастомный менеджер
 
     class Meta:
         verbose_name = "Пользователь"
