@@ -1,47 +1,35 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
-from materials.models import Urok, Kurs
-from materials.serializer import UrokSerializer, KursSerializer
-
 from rest_framework import viewsets
-from django_filters.rest_framework import DjangoFilterBackend
-from .models import Payment
-from .serializer import PaymentSerializer
-from .filters import PaymentFilter
+from .models import Kurs, Urok, Payment
+from .serializer import KursSerializer, UrokSerializer, PaymentSerializer
 from .permissions import IsOwnerOrModerator
-
-class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = PaymentFilter
-
-class UrokViewSet(ModelViewSet):
-    queryset = Urok.objects.all()
-    serializer_class = UrokSerializer
-    permission_classes = [IsOwnerOrModerator]
-
-class KursCreateApiView(CreateAPIView):
-    queryset = Kurs.objects.all()
-    serializer_class = KursSerializer
-
-class KursListApiView(ListAPIView):
-    queryset = Kurs.objects.all()
-    serializer_class = KursSerializer
-
-class KursRetrieveApiView(RetrieveAPIView):
-    queryset = Kurs.objects.all()
-    serializer_class = KursSerializer
-
-class KursUpdateApiView(UpdateAPIView):
-    queryset = Kurs.objects.all()
-    serializer_class = KursSerializer
-
-class KursDestroyApiView(DestroyAPIView):
-    queryset = Kurs.objects.all()
-    serializer_class = KursSerializer
 
 class KursViewSet(viewsets.ModelViewSet):
     queryset = Kurs.objects.all()
     serializer_class = KursSerializer
+    permission_classes = [IsOwnerOrModerator]
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='moderators').exists():
+            return Kurs.objects.all()
+        return Kurs.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class UrokViewSet(viewsets.ModelViewSet):
+    queryset = Urok.objects.all()
+    serializer_class = UrokSerializer
+    permission_classes = [IsOwnerOrModerator]
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='moderators').exists():
+            return Urok.objects.all()
+        return Urok.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
     permission_classes = [IsOwnerOrModerator]

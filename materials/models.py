@@ -2,17 +2,10 @@ from django.db import models
 from django.conf import settings
 
 class Kurs(models.Model):
-    name = models.CharField(
-        max_length=50, verbose_name="Название курса", help_text="Дайте название курса"
-    )
-    description = models.TextField(
-        verbose_name="Описание курса",
-        help_text="Опишите основные материалы и условия курса",
-        blank=True, null=True,
-    )
-    image = models.ImageField(
-        verbose_name="картинка", blank=True, null=True, help_text="Загрузите картинку"
-    )
+    name = models.CharField(max_length=50, verbose_name="Название курса")
+    description = models.TextField(verbose_name="Описание курса", blank=True, null=True)
+    image = models.ImageField(verbose_name="Картинка", blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='kurs', null=True, blank=True)
 
     class Meta:
         verbose_name = "Курс"
@@ -21,9 +14,10 @@ class Kurs(models.Model):
 class Urok(models.Model):
     name = models.CharField(max_length=50, verbose_name="Название урока", help_text="Дайте название урока")
     description = models.TextField(verbose_name="Описание урока", help_text="Опишите основные материалы и условия урока")
-    image = models.ImageField(verbose_name="картинка", blank=True, null=True, help_text="Загрузите картинку")
+    image = models.ImageField(verbose_name="Картинка", blank=True, null=True, help_text="Загрузите картинку")
     video_link = models.URLField(verbose_name="Ссылка на видео", help_text="Добавьте ссылку на урок")
     kurs = models.ForeignKey(Kurs, related_name='uroki', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uroki', null=True, blank=True)
 
     class Meta:
         verbose_name = "Урок"
