@@ -11,6 +11,15 @@ class Kurs(models.Model):
         verbose_name = "Курс"
         verbose_name_plural = "Курсы"
 
+# Новая модель подписки
+class Subscription(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    kurs = models.ForeignKey(Kurs, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'kurs')
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
 class Urok(models.Model):
     name = models.CharField(max_length=50, verbose_name="Название урока", help_text="Дайте название урока")
     description = models.TextField(verbose_name="Описание урока", help_text="Опишите основные материалы и условия урока")
