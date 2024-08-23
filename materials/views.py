@@ -1,12 +1,41 @@
 from rest_framework import viewsets
-from .models import Urok, Payment, Kurs, Subscription
+from .models import Urok, Subscription, Kurs, Payment
 from .serializer import KursSerializer, UrokSerializer, PaymentSerializer
 from .permissions import IsOwnerOrModerator, IsModeratorOrReadOnly
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .paginators import CustomPageNumberPagination
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+
+class CreateCheckoutSessionView(APIView):
+    def post(self, request):
+        kurs_id = request.data.get('kurs_id')
+        user_id = request.data.get('user_id')
+        success_url = request.data.get('success_url')
+        cancel_url = request.data.get('cancel_url')
+
+        if not all([kurs_id, user_id, success_url, cancel_url]):
+            return Response({'error': 'Missing parameters'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            kurs = Kurs.objects.get(id=kurs_id)
+        except Kurs.DoesNotExist:
+            return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Создание продукта и цены
+        product = create_product(kurs.name, kurs.description)
+        price = create_price(product.id, kurs.price)
+
+        # Создание сессии
+        session = create_checkout_session(price.id, success_url, cancel_url)
+
+        # Создание записи о платеже
+        create_payment(kurs_id, user_id, kurs.price)
+
+        return Response({'url': session.url}, status=status.HTTP_200_OK)
 
 class SubscriptionView(APIView):
     permission_classes = [IsAuthenticated]
@@ -14,15 +43,19 @@ class SubscriptionView(APIView):
     def post(self, request, *args, **kwargs):
         user = request.user
         course_id = request.data.get('course_id')
+
+        if not course_id:
+            return Response({'error': 'Missing course_id parameter'}, status=status.HTTP_400_BAD_REQUEST)
+
         course_item = get_object_or_404(Kurs, id=course_id)
         subs_item = Subscription.objects.filter(user=user, kurs=course_item)
 
         if subs_item.exists():
             subs_item.delete()
-            message = 'Подписка удалена'
+            message = 'Subscription removed'
         else:
             Subscription.objects.create(user=user, kurs=course_item)
-            message = 'Подписка добавлена'
+            message = 'Subscription added'
 
         return Response({"message": message})
 

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from materials.models import Payment
-from .models import User
+from .models import User, Donation
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,3 +14,9 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = ['id', 'user', 'paid_course', 'paid_lesson', 'payment_method']
+
+
+class DonationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation
+        fields = "__all__"

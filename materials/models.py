@@ -6,10 +6,12 @@ class Kurs(models.Model):
     description = models.TextField(verbose_name="Описание курса", blank=True, null=True)
     image = models.ImageField(verbose_name="Картинка", blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='kurs', null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     class Meta:
         verbose_name = "Курс"
         verbose_name_plural = "Курсы"
+
 
 # Новая модель подписки
 class Subscription(models.Model):
