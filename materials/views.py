@@ -9,6 +9,38 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+# Импорт функций для работы с Stripe и создания записей о платежах
+from .payment_services import create_product, create_price, create_checkout_session, create_payment
+from .tasks import send_course_update_email
+
+class KursViewSet(viewsets.ModelViewSet):
+    queryset = Kurs.objects.all()
+    serializer_class = KursSerializer
+    pagination_class = CustomPageNumberPagination
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'destroy']:
+            self.permission_classes = [IsOwnerOrModerator]
+        elif self.action in ['list', 'retrieve']:
+            self.permission_classes = [IsModeratorOrReadOnly]
+        return [permission() for permission in self.permission_classes]
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            if self.request.user.groups.filter(name='moderators').exists():
+                return Kurs.objects.all()
+            return Kurs.objects.filter(user=self.request.user)
+        else:
+            return Kurs.objects.none()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        # Запускаем задачу для отправки письма
+        send_course_update_email.delay(serializer.instance.id)
 
 class CreateCheckoutSessionView(APIView):
     def post(self, request):
@@ -58,30 +90,6 @@ class SubscriptionView(APIView):
             message = 'Subscription added'
 
         return Response({"message": message})
-
-class KursViewSet(viewsets.ModelViewSet):
-    queryset = Kurs.objects.all()
-    serializer_class = KursSerializer
-    pagination_class = CustomPageNumberPagination
-    permission_classes = [IsAuthenticated]
-
-    def get_permissions(self):
-        if self.action in ['create', 'update', 'destroy']:
-            self.permission_classes = [IsOwnerOrModerator]
-        elif self.action in ['list', 'retrieve']:
-            self.permission_classes = [IsModeratorOrReadOnly]
-        return [permission() for permission in self.permission_classes]
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            if self.request.user.groups.filter(name='moderators').exists():
-                return Kurs.objects.all()
-            return Kurs.objects.filter(user=self.request.user)
-        else:
-            return Kurs.objects.none()
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 class UrokViewSet(viewsets.ModelViewSet):
     queryset = Urok.objects.all()
