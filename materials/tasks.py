@@ -1,7 +1,23 @@
-from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Subscription, Kurs
+
+
+from datetime import timedelta
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+from celery import shared_task
+
+User = get_user_model()
+
+@shared_task
+def block_inactive_users():
+    inactive_period = timedelta(days=180)  # Задаем период неактивности
+    inactive_users = User.objects.filter(last_login__lt=timezone.now() - inactive_period, is_active=True)
+
+    for user in inactive_users:
+        user.is_active = False
+        user.save()
 
 
 @shared_task
