@@ -1,14 +1,14 @@
-Django==5.0.7
-djangorestframework==3.15.2
-psycopg2-binary==2.9.9
-python-dotenv==1.0.1
-pillow==10.4.0
-django-filter==24.3
+Django
+djangorestframework
+psycopg2-binary
+python-dotenv
+pillow
+django-filter
 djangorestframework-simplejwt
 stripe
 forex-python
-celery==5.3.4
-django-celery-beat==2.5.0
-redis==4.5.5
+celery
+django-celery-beat
+redis
 
 
