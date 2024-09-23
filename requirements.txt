@@ -10,5 +10,4 @@ forex-python
 celery
 django-celery-beat
 redis
-
-
+drf_yasg
